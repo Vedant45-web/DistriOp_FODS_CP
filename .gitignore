@@ -1,0 +1,29 @@
+# Build directories
+build/
+build-*/
+
+# Compiled files
+*.exe
+*.obj
+*.o
+*.pdb
+*.ilk
+*.log
+
+# Runtime data
+distriopt_snapshot.txt
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and OS files
+.vs/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1527">
+  <title>DistriOpt · Distributed AI Workload Optimization (FoDS)</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="theme-dark">
+<div class="app-layout">
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-badge">DO</div>
+        <div class="brand-text">
+          <span class="brand-title">DistriOpt</span>
+          <span class="brand-sub">FODS COMPUTE CONTROL</span>
+        </div>
+      </div>
+      <div class="sys-status">
+        <span class="status-pulse" id="connectionDot"></span>
+        <span class="status-label" id="connectionText">Connecting...</span>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <div class="nav-section-title">CONTROL PLANE</div>
+      <a class="nav-item active" href="#overview" data-nav="overview">
+        <span class="nav-icon">◫</span>
+        <span class="nav-text">Cluster Overview</span>
+      </a>
+      <a class="nav-item" href="#cluster" data-nav="cluster">
+        <span class="nav-icon">▦</span>
+        <span class="nav-text">Compute Nodes</span>
+        <span class="badge" id="sidebarNodeBadge">0/4</span>
+      </a>
+      <a class="nav-item" href="#workloads" data-nav="workloads">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-text">Workload Scheduler</span>
+      </a>
+      <a class="nav-item" href="#analytics" data-nav="analytics">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Performance Analytics</span>
+      </a>
+      
+      <div class="nav-section-title">ACADEMIC & DISTRIBUTED</div>
+      <a class="nav-item" href="#fods" data-nav="fods">
+        <span class="nav-icon">🔬</span>
+        <span class="nav-text">FoDS Algorithm Lab</span>
+      </a>
+      <a class="nav-item" href="#live" data-nav="live">
+        <span class="nav-icon">🌐</span>
+        <span class="nav-text">Live Worker Agents</span>
+        <span class="badge badge-emerald" id="sidebarLiveBadge">0 Live</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="fods-tag">
+        <div class="fods-tag-icon">⚡</div>
+        <div class="fods-tag-info">
+          <b>FoDS Subject Project</b>
+          <small>C++17 Heterogeneous Placement</small>
+        </div>
+      </div>
+      <div class="theme-switch-row">
+        <span>Dark Mode</span>
+        <button id="themeToggle" class="theme-toggle-btn" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEW CONTAINER -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb">FOUNDATIONS OF DATA SCIENCE <span class="sep">/</span> <strong id="currentSectionName">CLUSTER OVERVIEW</strong></div>
+        <h1 class="page-title">Distributed Workload Optimization</h1>
+      </div>
+      <div class="topbar-actions">
+        <div class="mode-indicator-box">
+          <span class="mode-label">CLUSTER MODE:</span>
+          <select id="modeSelect" class="styled-select">
+            <option value="Manual">Manual Simulation</option>
+            <option value="Live">Live Physical Workers</option>
+          </select>
+        </div>
+        <div class="strategy-indicator-box">
+          <span class="mode-label">SCHEDULER:</span>
+          <select id="strategySelect" class="styled-select">
+            <option value="DistriOpt">DistriOpt (Resource-Aware)</option>
+            <option value="FCFS">FCFS (Queue FIFO)</option>
+            <option value="Priority">Priority (Max-Heap)</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost" id="refreshBtn" title="Fetch latest telemetry">↻ <span>Sync</span></button>
+      </div>
+    </header>
+
+    <!-- SECTION: OVERVIEW -->
+    <section class="content-section" id="overview">
+      <!-- HERO BANNER -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="dot-live"></span> C++17 MULTI-OBJECTIVE HEURISTIC SCHEDULING
+          </div>
+          <h2>Resource-Aware Cluster Optimization</h2>
+          <p>
+            DistriOpt evaluates heterogeneous compute machines (CPU, RAM, GPU capacity) 
+            to intelligently assign competing AI Inference and Data Science tasks. 
+            Powered by custom <strong>FoDS Data Structures</strong> (Queues, Max-Heaps, Linked Lists).
+          </p>
+          <div class="hero-button-row">
+            <button class="btn btn-primary" id="demoBtn">
+              <span>⚡ Load Demo Cluster &amp; 12 Jobs</span>
+            </button>
+            <button class="btn btn-secondary" id="benchHeroBtn">
+              <span>📊 Run Strategy Benchmark</span>
+            </button>
+            <button class="btn btn-outline" id="resetBtn">
+              <span>↺ Reset Session</span>
+            </button>
+          </div>
+        </div>
+        <div class="hero-schematic" aria-hidden="true">
+          <div class="schematic-ring ring-outer"></div>
+          <div class="schematic-ring ring-mid"></div>
+          <div class="schematic-core">
+            <strong>DO</strong>
+            <small>FODS</small>
+          </div>
+          <div class="schematic-tag tag-cpu">CPU Load</div>
+          <div class="schematic-tag tag-ram">RAM Pool</div>
+          <div class="schematic-tag tag-gpu">GPU VRAM</div>
+        </div>
+      </div>
+
+      <!-- METRICS GRID -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">CLUSTER CAPACITY</span>
+            <span class="metric-icon">▦</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-val" id="nodeCount">0<span class="metric-max"> / 4</span></span>
+            <span class="metric-sub" id="nodeCaption">No nodes registered</span>
+          </div>
+          <div class="metric-meter"><div class="meter-bar" id="meterNodes" style="width: 0%"></div></div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">TOTAL SUBMITTED</span>
+            <span class="metric-icon">📥</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-val" id="submitted">0</span>
+            <span class="metric-sub">Workloads received</span>
+          </div>
+          <div class="metric-meter"><div class="meter-bar blue" style="width: 100%"></div></div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">COMPLETED JOBS</span>
+            <span class="metric-icon green">✓</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-val" id="completed">0</span>
+            <span class="metric-sub" id="completionCaption">Awaiting workloads</span>
+          </div>
+          <div class="metric-meter"><div class="meter-bar green" id="meterCompleted" style="width: 0%"></div></div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">AVERAGE CLUSTER LOAD</span>
+            <span class="metric-icon purple">◌</span>
+          </div>
+          <div class="metric-body">
+            <span class="metric-val" id="utilization">0<span class="metric-unit">%</span></span>
+            <span class="metric-sub">Across all active nodes</span>
+          </div>
+          <div class="metric-meter"><div class="meter-bar purple" id="meterUtil" style="width: 0%"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: CLUSTER NODES -->
+    <section class="content-section" id="cluster">
+      <div class="section-title-bar">
+        <div>
+          <span class="section-kicker">INFRASTRUCTURE LAYER</span>
+          <h2>Compute Node Registry</h2>
+          <p>Heterogeneous nodes registered in the C++ cluster manager. Max capacity: 4 nodes.</p>
+        </div>
+        <div class="section-actions">
+          <span class="capacity-pill"><strong id="capacityCount">0</strong> / 4 Slots Utilized</span>
+          <button class="btn btn-primary" id="openNode">＋ Add Virtual Node</button>
+        </div>
+      </div>
+
+      <div id="nodes" class="nodes-grid">
+        <div class="empty-state">
+          <div class="empty-icon">▦</div>
+          <h3>Cluster has no active nodes</h3>
+          <p>Click "Add Virtual Node" to define custom CPU/RAM/GPU nodes or click "Load Demo Environment" above.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: WORKLOADS -->
+    <section class="content-section" id="workloads">
+      <div class="section-title-bar">
+        <div>
+          <span class="section-kicker">WORKLOAD DISPATCH</span>
+          <h2>Submit Computational Workload</h2>
+          <p>Specify task requirements. Feasibility constraints check CPU, RAM and GPU fit prior to allocation.</p>
+        </div>
+      </div>
+
+      <div class="workload-two-col">
+        <!-- FORM -->
+        <div class="panel-card form-panel">
+          <div class="panel-header">
+            <div class="panel-icon-circle">⚡</div>
+            <div>
+              <h3>Workload Specification</h3>
+              <small>Define resource constraints &amp; computational complexity</small>
+            </div>
+          </div>
+
+          <!-- QUICK PRESETS -->
+          <div class="presets-row">
+            <span class="preset-label">Quick Presets:</span>
+            <button type="button" class="preset-chip" onclick="applyPreset('ai')">🤖 AI Inference (1 CPU, 2GB, 1GB GPU)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('matrix')">⊞ Matrix Multiply (4 CPU, 4GB)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('sort')">⇅ Parallel Sort (2 CPU, 3GB)</button>
+            <button type="button" class="preset-chip" onclick="applyPreset('cv')">🖼 Pixel Filter (3 CPU, 2GB)</button>
+          </div>
+
+          <form id="jobForm" class="job-form">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Workload Name</label>
+                <input name="name" id="jobName" placeholder="e.g. Deep Learning Inference Batch" required maxlength="48" value="Deep Learning Inference Batch">
+              </div>
+
+              <div class="form-group">
+                <label>Workload Algorithm Type</label>
+                <select name="type" id="jobType">
+                  <option value="AI Inference">AI Inference (Feedforward ANN)</option>
+                  <option value="Matrix Computation">Matrix Computation (O(n³))</option>
+                  <option value="Data Processing">Data Processing (Merge Sort O(n log n))</option>
+                  <option value="Image Processing">Image Processing (Pixel Convolution)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Priority Class</label>
+                <select name="priority" id="jobPriority">
+                  <option value="Critical">Critical (Priority = 4)</option>
+                  <option value="High">High (Priority = 3)</option>
+                  <option value="Medium" selected>Medium (Priority = 2)</option>
+                  <option value="Low">Low (Priority = 1)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Required CPU Cores</label>
+                <input name="cpuRequired" id="jobCpu" type="number" min="1" max="128" value="2" required>
+              </div>
+
+              <div class="form-group">
+                <label>Required RAM (GB)</label>
+                <input name="ramRequiredGB" id="jobRam" type="number" min="0.1" step="0.1" value="2" required>
+              </div>
+
+              <div class="form-group">
+                <label>Required GPU VRAM (GB)</label>
+                <input name="gpuRequiredGB" id="jobGpu" type="number" min="0" step="0.5" value="0">
+              </div>
+
+              <div class="form-group">
+                <label>Work Units (Iterations)</label>
+                <input name="workUnits" id="jobUnits" type="number" min="100" max="2000000" step="500" value="10000">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <span class="feasibility-note">✓ Feasibility check executed prior to placement</span>
+              <button class="btn btn-primary" type="submit">Schedule Workload →</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- SCHEDULER HEURISTIC CARD -->
+        <div class="panel-card heuristic-panel">
+          <div class="panel-header">
+            <div class="panel-icon-circle blue">🧮</div>
+            <div>
+              <h3>DistriOpt Placement Heuristic</h3>
+              <small>Mathematical formulation implemented in C++</small>
+            </div>
+          </div>
+
+          <div class="formula-box">
+            <code>Score(N, J) = 0.30·CPU_free + 0.30·RAM_free + 0.20·GPU_free + 0.10·CPU_fit + 0.10·RAM_fit</code>
+          </div>
+
+          <div class="heuristic-expl">
+            <div class="h-step">
+              <span class="h-num">1</span>
+              <div>
+                <strong>Feasibility Filter</strong>
+                <p>Nodes without sufficient free CPU, RAM, and GPU capacity are immediately disqualified.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <span class="h-num">2</span>
+              <div>
+                <strong>Availability Evaluation (80%)</strong>
+                <p>Balances cluster load by preferring machines with available CPU, RAM, and GPU headroom.</p>
+              </div>
+            </div>
+            <div class="h-step">
+              <span class="h-num">3</span>
+              <div>
+                <strong>Tightness Fit (20%)</strong>
+                <p>Prevents over-allocation by reserving larger machines for heavier upcoming jobs.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-struct-badge-row">
+            <span class="ds-pill">FODSQueue</span>
+            <span class="ds-pill">FODSPriorityQueue</span>
+            <span class="ds-pill">Binary Max-Heap</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKLOAD TABLE -->
+      <div class="panel-card table-panel">
+        <div class="table-header-row">
+          <div>
+            <h3>Workload Execution Queue</h3>
+            <small>Live scheduling history and status from the C++ controller</small>
+          </div>
+          <div class="table-filter-group">
+            <button class="filter-btn active" onclick="filterJobs('all')">All</button>
+            <button class="filter-btn" onclick="filterJobs('Queued')">Queued</button>
+            <button class="filter-btn" onclick="filterJobs('Running')">Running</button>
+            <button class="filter-btn" onclick="filterJobs('Completed')">Completed</button>
+            <button class="filter-btn" onclick="filterJobs('Failed')">Failed</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>JOB ID</th>
+                <th>WORKLOAD NAME</th>
+                <th>ALGORITHM TYPE</th>
+                <th>PRIORITY</th>
+                <th>RESOURCES REQUESTED</th>
+                <th>ASSIGNED NODE</th>
+                <th>STATUS &amp; TELEMETRY</th>
+              </tr>
+            </thead>
+            <tbody id="jobRows">
+              <tr>
+                <td colspan="7" class="empty-cell">No workloads submitted yet. Use the form above or click "Load Demo Environment".</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: ANALYTICS & BENCHMARK -->
+    <section class="content-section" id="analytics">
+      <div class="section-title-bar">
+        <div>
+          <span class="section-kicker">EVALUATION &amp; BENCHMARKING</span>
+          <h2>Cluster Analytics &amp; Strategy Comparison</h2>
+          <p>Direct experimental comparison of FCFS, Priority, and DistriOpt scheduling over 300 test workloads.</p>
+        </div>
+        <button class="btn btn-primary" id="benchmarkBtn">⚡ Run 300-Job Strategy Benchmark</button>
+      </div>
+
+      <!-- BENCHMARK RESULTS (Dynamic) -->
+      <div id="benchmarkResults" class="benchmark-results-container hidden"></div>
+
+      <div class="analytics-grid">
+        <!-- CPU CHART -->
+        <div class="panel-card chart-panel">
+          <div class="panel-header">
+            <div>
+              <h3>Node Load Distribution</h3>
+              <small>Current real-time CPU utilization per cluster node</small>
+            </div>
+            <span class="chart-badge">PERCENTAGE (%)</span>
+          </div>
+          <div id="utilChart" class="bar-chart-body">
+            <div class="chart-empty">Add a node or load the demo to view resource distribution.</div>
+          </div>
+          <div class="chart-legend-axis">
+            <span>0%</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <!-- INSIGHTS -->
+        <div class="panel-card insights-panel">
+          <div class="panel-header">
+            <div>
+              <h3>Session Telemetry Summary</h3>
+              <small>Calculated from C++ controller state</small>
+            </div>
+          </div>
+          <div class="insights-list">
+            <div class="insight-item">
+              <span class="insight-label">Queued Workloads</span>
+              <strong class="insight-val" id="queued">0</strong>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Running Remote Workloads</span>
+              <strong class="insight-val blue" id="running">0</strong>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Failed / Disconnected Workloads</span>
+              <strong class="insight-val red" id="failed">0</strong>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Estimated Resource Wastage</span>
+              <strong class="insight-val amber" id="wastage">0%</strong>
+            </div>
+            <div class="insight-item">
+              <span class="insight-label">Average Execution Time</span>
+              <strong class="insight-val green" id="execution">0.00 s</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: FODS ALGORITHM LAB (Subject-Specific Module) -->
+    <section class="content-section" id="fods">
+      <div class="section-title-bar">
+        <div>
+          <span class="section-kicker">ACADEMIC FOUNDATIONS</span>
+          <h2>FoDS Data Structures &amp; Algorithms Lab</h2>
+          <p>
+            Interactive reference and live testing suite for the custom data structures and algorithms 
+            implemented in <code>include/fods.hpp</code>.
+          </p>
+        </div>
+      </div>
+
+      <!-- FODS CARDS GRID -->
+      <div class="fods-ds-grid">
+        <div class="fods-card">
+          <div class="fods-card-badge">FIFO</div>
+          <h4>FODSQueue&lt;T&gt;</h4>
+          <p>Linked-list backed FIFO queue. Used in DistriOpt for <strong>FCFS Scheduling</strong>.</p>
+          <div class="fods-complexity">Enqueue: O(1) · Dequeue: O(1)</div>
+        </div>
+
+        <div class="fods-card">
+          <div class="fods-card-badge purple">HEAP</div>
+          <h4>FODSPriorityQueue&lt;T&gt;</h4>
+          <p>Array-backed Binary Max-Heap. Used in DistriOpt for <strong>Priority-based Scheduling</strong>.</p>
+          <div class="fods-complexity">Insert: O(log n) · ExtractMax: O(log n)</div>
+        </div>
+
+        <div class="fods-card">
+          <div class="fods-card-badge emerald">LINKED</div>
+          <h4>FODSLinkedList&lt;T&gt;</h4>
+          <p>Singly linked list with dynamic node chaining. Powers the <strong>Cluster Node Registry</strong>.</p>
+          <div class="fods-complexity">Insert: O(1) · Search: O(n) · Delete: O(n)</div>
+        </div>
+
+        <div class="fods-card">
+          <div class="fods-card-badge blue">ARRAY</div>
+          <h4>FODSArray&lt;T&gt;</h4>
+          <p>Contiguous dynamic array with 2x geometric growth. Used for internal metric buffers.</p>
+          <div class="fods-complexity">Access: O(1) · Amortized Push: O(1)</div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE ALGORITHM RUNNER -->
+      <div class="panel-card fods-lab-panel">
+        <div class="panel-header">
+          <div class="panel-icon-circle green">🧪</div>
+          <div>
+            <h3>Interactive Algorithm Visualizer &amp; Complexity Table</h3>
+            <small>Compare searching and sorting techniques from the FoDS syllabus</small>
+          </div>
+        </div>
+
+        <div class="fods-interactive-layout">
+          <div class="fods-controls">
+            <div class="fods-ctrl-group">
+              <label>Select Algorithm:</label>
+              <select id="fodsAlgoSelect" class="styled-select" onchange="updateAlgoInfo()">
+                <optgroup label="Searching Algorithms">
+                  <option value="linear">Linear Search — O(n)</option>
+                  <option value="sentinel">Sentinel Search — O(n)</option>
+                  <option value="binary">Binary Search — O(log n)</option>
+                  <option value="fibonacci">Fibonacci Search — O(log n)</option>
+                  <option value="indexed">Indexed Sequential Search — O(√n)</option>
+                </optgroup>
+                <optgroup label="Sorting Algorithms">
+                  <option value="quick">Quick Sort — O(n log n) avg</option>
+                  <option value="merge">Merge Sort — O(n log n)</option>
+                  <option value="shell">Shell Sort — O(n^1.5)</option>
+                  <option value="radix">Radix Sort (Base-10) — O(d·n)</option>
+                  <option value="counting">Counting Sort — O(n + k)</option>
+                  <option value="bubble">Bubble Sort — O(n²)</option>
+                  <option value="insertion">Insertion Sort — O(n²)</option>
+                  <option value="selection">Selection Sort — O(n²)</option>
+                  <option value="bucket">Bucket Sort — O(n + k)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="fods-ctrl-group" id="fodsSearchKeyGroup">
+              <label>Search Target Value:</label>
+              <input type="number" id="fodsSearchKey" value="42" class="styled-input">
+            </div>
+
+            <button class="btn btn-primary" onclick="runInteractiveAlgo()">Execute Algorithm</button>
+          </div>
+
+          <div class="fods-output-box">
+            <div class="fods-info-header">
+              <strong id="algoName">Quick Sort</strong>
+              <span class="badge" id="algoComplexity">Average: O(n log n)</span>
+            </div>
+            <p id="algoDesc">Divide-and-conquer partition sort implemented in C++ core.</p>
+            <div class="fods-terminal" id="fodsTerminal">Click "Execute Algorithm" to run the algorithm on sample dataset...</div>
+          </div>
+        </div>
+
+        <!-- COMPLEXITY REFERENCE MATRIX -->
+        <div class="complexity-table-wrapper">
+          <h4 class="table-subheading">FoDS Complexity Matrix (Verified by Unit Tests)</h4>
+          <table class="data-table complexity-table">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Type</th>
+                <th>Best Case</th>
+                <th>Average Case</th>
+                <th>Worst Case</th>
+                <th>Auxiliary Space</th>
+                <th>Role in DistriOpt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>Binary Max-Heap</b></td><td>Data Structure</td><td>O(1)</td><td>O(log n)</td><td>O(log n)</td><td>O(n)</td><td>Priority Queue Scheduler</td></tr>
+              <tr><td><b>FIFO Queue</b></td><td>Data Structure</td><td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(n)</td><td>FCFS Strategy Queue</td></tr>
+              <tr><td><b>Singly Linked List</b></td><td>Data Structure</td><td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>Cluster Node Registry</td></tr>
+              <tr><td><b>Binary Search</b></td><td>Searching</td><td>O(1)</td><td>O(log n)</td><td>O(log n)</td><td>O(1)</td><td>Node lookup in sorted arrays</td></tr>
+              <tr><td><b>Fibonacci Search</b></td><td>Searching</td><td>O(1)</td><td>O(log n)</td><td>O(log n)</td><td>O(1)</td><td>Division-free binary division</td></tr>
+              <tr><td><b>Indexed Sequential</b></td><td>Searching</td><td>O(1)</td><td>O(√n)</td><td>O(√n)</td><td>O(1)</td><td>Block-jump partitioned search</td></tr>
+              <tr><td><b>Merge Sort</b></td><td>Sorting</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Remote Worker Data Processing</td></tr>
+              <tr><td><b>Quick Sort</b></td><td>Sorting</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>In-memory job ranking</td></tr>
+              <tr><td><b>Radix Sort</b></td><td>Sorting</td><td>O(d·n)</td><td>O(d·n)</td><td>O(d·n)</td><td>O(n + b)</td><td>Integer workload sorting</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: LIVE WORKERS -->
+    <section class="content-section" id="live">
+      <div class="section-title-bar">
+        <div>
+          <span class="section-kicker">PHYSICAL MULTI-DEVICE CLUSTER</span>
+          <h2>Connect Remote Worker Laptops</h2>
+          <p>Run the compiled C++ Worker Agent on any other laptop connected to your Wi-Fi or LAN.</p>
+        </div>
+        <span class="live-status-pill">
+          <i class="live-dot"></i>
+          <span><strong id="liveCount">0</strong> / 4 PHYSICAL WORKERS CONNECTED</span>
+        </span>
+      </div>
+
+      <div class="live-steps-grid">
+        <div class="panel-card step-card">
+          <div class="step-badge">01</div>
+          <h4>Start the Controller Server</h4>
+          <p>Keep this controller running on your laptop. Note your local IPv4 address.</p>
+          <div class="code-box">
+            <code>Double-click START_SERVER.bat</code>
+          </div>
+        </div>
+
+        <div class="panel-card step-card">
+          <div class="step-badge">02</div>
+          <h4>Find Your Local IP</h4>
+          <p>Find your Wi-Fi IPv4 address using the helper batch script:</p>
+          <div class="code-box">
+            <code>Double-click SHOW_LOCAL_IP.bat</code>
+          </div>
+        </div>
+
+        <div class="panel-card step-card">
+          <div class="step-badge">03</div>
+          <h4>Run Worker on Other Laptop</h4>
+          <p>Copy the project folder to the second laptop and run:</p>
+          <div class="code-box">
+            <code id="workerCommand">distriopt_worker.exe 127.0.0.1 8080 "Worker-01"</code>
+          </div>
+          <button class="btn btn-outline btn-sm" id="copyCommand">📋 Copy Worker Command</button>
+        </div>
+      </div>
+
+      <div class="live-capabilities-panel panel-card">
+        <div class="panel-header">
+          <div class="panel-icon-circle purple">🔒</div>
+          <div>
+            <h3>Security &amp; Hardware Telemetry Specifications</h3>
+            <small>Worker capabilities and fail-safe architecture</small>
+          </div>
+        </div>
+        <div class="caps-grid">
+          <div class="cap-item">
+            <strong>CPU &amp; RAM Hardware Detection</strong>
+            <p>Uses Windows <code>GetSystemInfo</code> and <code>GlobalMemoryStatusEx</code> to detect physical cores and memory automatically.</p>
+          </div>
+          <div class="cap-item">
+            <strong>NVIDIA GPU Telemetry</strong>
+            <p>Queries <code>nvidia-smi</code> for GPU model and VRAM. (Live jobs execute on CPU; GPU telemetry is recorded).</p>
+          </div>
+          <div class="cap-item">
+            <strong>Watchdog Heartbeat &amp; Recovery</strong>
+            <p>Every 3 seconds, a background watchdog thread checks workers. If no heartbeat arrives for 15s, work is requeued.</p>
+          </div>
+          <div class="cap-item">
+            <strong>Allow-Listed Secure Workloads</strong>
+            <p>Zero arbitrary shell commands. Agents execute only vetted matrix multiplications, neural inference, and sorting passes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <strong>DistriOpt</strong> · Foundations of Data Science (FoDS) Subject Project
+      </div>
+      <div class="footer-right">
+        <span>C++17 Multi-Node Workload Scheduler</span> · <span>Clean Architecture</span>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- MODAL: ADD VIRTUAL NODE -->
+<dialog id="nodeDialog" class="styled-dialog">
+  <form id="nodeForm" class="dialog-form">
+    <div class="dialog-header">
+      <div>
+        <span class="dialog-sub">VIRTUAL CLUSTER CONFIGURATION</span>
+        <h3>Add Virtual Compute Node</h3>
+      </div>
+      <button type="button" class="dialog-close" id="closeDialog">✕</button>
+    </div>
+
+    <div class="dialog-body">
+      <div class="form-group">
+        <label>Node Display Name</label>
+        <input name="name" placeholder="e.g. CPU Compute Node · 01" required maxlength="40" value="Virtual Node Alpha">
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>CPU Cores</label>
+          <input name="cpuCores" type="number" min="1" max="128" value="8" required>
+        </div>
+        <div class="form-group">
+          <label>System RAM (GB)</label>
+          <input name="ramGB" type="number" min="1" step="0.5" value="16" required>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>GPU Hardware Model</label>
+          <input name="gpuModel" value="NVIDIA RTX 4070 (Simulated)" placeholder="e.g. NVIDIA RTX 3060">
+        </div>
+        <div class="form-group">
+          <label>GPU Dedicated VRAM (GB)</label>
+          <input name="gpuMemoryGB" type="number" min="0" step="0.5" value="8">
+        </div>
+      </div>
+      <small class="dialog-note">Virtual nodes simulate resource allocation and placement heuristics in Manual mode.</small>
+    </div>
+
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-ghost" onclick="$('nodeDialog').close()">Cancel</button>
+      <button type="submit" class="btn btn-primary">Register Node to Cluster</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="toast-popup"></div>
+
+<script src="./app.js"></script>
+</body>
+</html>
